@@ -1,4 +1,5 @@
 import { useState } from "react";
+import VoiceInput from "../Voice/VoiceInput";
 
 function Notes({ notes, addNote, deleteNote }) {
   const [title, setTitle] = useState("");
@@ -23,12 +24,21 @@ function Notes({ notes, addNote, deleteNote }) {
     <div>
       <h2>Notes</h2>
 
+      {/* Voice input */}
+      <VoiceInput
+        onResult={(spokenText) =>
+          setContent(prev => prev + " " + spokenText)
+        }
+      />
+
+      {/* Title input */}
       <input
         placeholder="Title"
         value={title}
         onChange={e => setTitle(e.target.value)}
       />
 
+      {/* Content input */}
       <textarea
         placeholder="Write your note..."
         value={content}
@@ -37,12 +47,15 @@ function Notes({ notes, addNote, deleteNote }) {
 
       <button onClick={handleAdd}>Add Note</button>
 
+      {/* Notes list */}
       <ul>
         {notes.map(note => (
           <li key={note.id}>
             <strong>{note.title}</strong>
             <p>{note.content}</p>
-            <button onClick={() => deleteNote(note.id)}>Delete</button>
+            <button onClick={() => deleteNote(note.id)}>
+              Delete
+            </button>
           </li>
         ))}
       </ul>
