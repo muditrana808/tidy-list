@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import Notes from "./components/Notes/Notes";
 import Todos from "./components/Todos/Todos";
+import Auth from "./components/Auth/Auth";
 
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "./services/firebase";
-import Auth from "./components/Auth/Auth";
 
 import {
   collection,
@@ -19,18 +19,21 @@ function App() {
   const [notes, setNotes] = useState([]);
   const [todos, setTodos] = useState([]);
   const [user, setUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
 
-  // 🔐 Auth listener
+  // 🔐 Auth listener (MUST be first effect)
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, currentUser => {
       setUser(currentUser);
+      setAuthReady(true);
     });
+
     return () => unsub();
   }, []);
 
   // 📝 Notes listener
   useEffect(() => {
-    if (!user) return;  
+    if (!user) return;
 
     const unsub = onSnapshot(
       collection(db, "users", user.uid, "notes"),
@@ -118,32 +121,39 @@ function App() {
     );
   }
 
-  
+  // 🔒 AUTH GATE — ONLY RENDER AFTER THIS
+  if (!authReady) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        <p>Starting Tidy List…</p>
+      </div>
+    );
+  }
 
   return (
-  <div>
-    <h1>Tidy List</h1>
+    <div>
+      <h1>Tidy List</h1>
 
-    <Auth user={user} />
+      {!user && <Auth />}
 
-    {user && (
-      <>
-        <Notes
-          notes={notes}
-          addNote={addNote}
-          deleteNote={deleteNote}
-        />
+      {user && (
+        <>
+          <Notes
+            notes={notes}
+            addNote={addNote}
+            deleteNote={deleteNote}
+          />
 
-        <Todos
-          todos={todos}
-          addTodo={addTodo}
-          toggleTodo={toggleTodo}
-          deleteTodo={deleteTodo}
-        />
-      </>
-    )}
-  </div>
-);
+          <Todos
+            todos={todos}
+            addTodo={addTodo}
+            toggleTodo={toggleTodo}
+            deleteTodo={deleteTodo}
+          />
+        </>
+      )}
+    </div>
+  );
 }
 
 export default App;
