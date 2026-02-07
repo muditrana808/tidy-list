@@ -1,36 +1,12 @@
 import { useState } from "react";
 
-function Todos({ todos, setTodos }) {
+function Todos({ todos, addTodo, toggleTodo, deleteTodo }) {
   const [text, setText] = useState("");
 
-  function addTodo() {
+  function handleAdd() {
     if (!text) return;
-
-    setTodos(prev => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        text,
-        completed: false,
-        createdAt: new Date()
-      }
-    ]);
-
+    addTodo(text);
     setText("");
-  }
-
-  function toggleTodo(id) {
-    setTodos(prev =>
-      prev.map(todo =>
-        todo.id === id
-          ? { ...todo, completed: !todo.completed }
-          : todo
-      )
-    );
-  }
-
-  function deleteTodo(id) {
-    setTodos(prev => prev.filter(t => t.id !== id));
   }
 
   return (
@@ -42,18 +18,17 @@ function Todos({ todos, setTodos }) {
         value={text}
         onChange={e => setText(e.target.value)}
       />
-
-      <button onClick={addTodo}>Add</button>
+      <button onClick={handleAdd}>Add</button>
 
       <ul>
         {todos.map(todo => (
           <li key={todo.id}>
             <span
+              onClick={() => toggleTodo(todo.id, todo.completed)}
               style={{
-                textDecoration: todo.completed ? "line-through" : "none",
-                cursor: "pointer"
+                cursor: "pointer",
+                textDecoration: todo.completed ? "line-through" : "none"
               }}
-              onClick={() => toggleTodo(todo.id)}
             >
               {todo.text}
             </span>
